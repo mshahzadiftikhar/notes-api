@@ -73,6 +73,46 @@ Notes:
 - The Docker Compose file should be present at the project root (if not, create one matching these scripts).
 - `db:reset` will remove volumes — use with caution on important data.
 
+## Migrations & Seeders (Sequelize)
+
+This project uses `sequelize` as an ORM and `sequelize-cli` (installed as a dev dependency) to manage database schema changes and seed data.
+
+Typical workflow:
+
+- Ensure the database is running (local Docker Compose):
+
+```bash
+npm run db:start
+```
+
+- Run migrations (apply all pending migrations):
+
+```bash
+npm run db:migrate
+# or: npx sequelize-cli db:migrate
+```
+
+- Undo the last migration:
+
+```bash
+npm run db:migrate:undo
+# or: npx sequelize-cli db:migrate:undo
+```
+
+- Undo all migrations:
+
+```bash
+npm run db:migrate:undo:all
+# or: npx sequelize-cli db:migrate:undo:all
+```
+
+- Generate a new migration scaffold (name your migration):
+
+```bash
+npm run db:migration:generate -- --name create-notes-table
+# or: npx sequelize-cli migration:generate --name create-notes-table
+```
+
 ## Scripts
 
 - Start (production):
