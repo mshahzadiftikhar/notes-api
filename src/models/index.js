@@ -3,7 +3,7 @@ const sequelize = getSequelize();
 
 const User = require('./user.model')(sequelize);
 const Note = require('./note.model')(sequelize);
-const NoteVersion = require('./noteVersion.model')(sequelize);
+const NoteVersion = require('./note.version.model')(sequelize);
 
 // Associations
 User.hasMany(Note, { foreignKey: 'user_id' });
