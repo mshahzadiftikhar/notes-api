@@ -222,3 +222,42 @@ curl -X POST http://localhost:3000/api/v1/notes \
     "content": "This is the content of my note."
   }'
 ```
+---
+
+### Retrieve All Notes API
+
+Fetches all notes associated with the authenticated user.  
+Only the **latest version** of each note is returned.  
+Historical versions are not included in this response.
+
+This API requires authentication via **JWT**.  
+Authorization: Bearer <JWT_TOKEN>
+
+#### Endpoint
+GET `/api/v1/notes`
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+[
+  {
+    "id": 2,
+    "title": "Meeting Notes",
+    "content": "Discussion points..."
+  },
+  {
+    "id": 1,
+    "title": "My First Note",
+    "content": "This is the content of my note."
+  }
+]
+```
+
+#### Example
+
+```
+curl -X GET http://localhost:3000/api/v1/notes \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```

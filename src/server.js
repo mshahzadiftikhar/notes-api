@@ -6,11 +6,6 @@ const getSequelize = require('./config/database');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'http://localhost';
 
-if (!process.env.JWT_SECRET) {
-  console.error('Missing required env: JWT_SECRET');
-  process.exit(1);
-}
-
 const startServer = async () => {
   try {
     const sequelize = getSequelize();
