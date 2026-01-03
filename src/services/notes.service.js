@@ -19,4 +19,12 @@ const createNote = async ({ userId, title, content }) => {
   return note;
 };
 
-module.exports = { createNote };
+const getAllNotes = async (userId, fields = ['id', 'title', 'content']) => {
+    return await Note.findAll({
+        where: { user_id: userId },
+        attributes: fields,
+        order: [['updatedAt', 'DESC']]
+    });
+};
+
+module.exports = { createNote, getAllNotes };
