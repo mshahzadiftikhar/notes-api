@@ -1,4 +1,4 @@
-const { createNote, getAllNotes, getNoteById } = require('../services/notes.service');
+const { createNote, getAllNotes, getNoteById, softDeleteNote } = require('../services/notes.service');
 
 const create = async (req, res, next) => {
   try {
@@ -36,4 +36,18 @@ const getById = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getAll, getById };
+
+const deleteNote = async (req, res, next) => {
+  try {
+    const result = await softDeleteNote({
+      noteId: req.params.id,
+      userId: req.user.id
+    });
+
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { create, getAll, getById, deleteNote };

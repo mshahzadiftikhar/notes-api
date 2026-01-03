@@ -64,4 +64,20 @@ const getNoteById = async ({ noteId, userId }) => {
   };
 };
 
-module.exports = { createNote, getAllNotes, getNoteById };
+const softDeleteNote = async ({ noteId, userId }) => {
+    const note = await Note.findOne({
+        where: { id: noteId, user_id: userId, deleted_at: null }
+    });
+
+    if (!note) {
+        const error = new Error('Note not found');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    await note.destroy(); // Soft delete because we have set paranoid to true in model
+
+    return { message: 'Note deleted successfully' };
+};
+
+module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote };
