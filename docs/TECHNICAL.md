@@ -53,8 +53,6 @@ It provides a secure and scalable foundation for a note-taking application with 
 Creates a new user account with **secure password hashing**.  
 This endpoint validates input, prevents duplicate registrations, and ensures passwords are **never stored in plaintext**.
 
----
-
 #### Endpint
 POST `/api/v1/auth/register`
 
@@ -79,7 +77,7 @@ POST `/api/v1/auth/register`
 }
 ```
 
-#### Failure Response Format
+#### Failure Response
 
 ```json
 {
@@ -104,13 +102,12 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
     "password": "StrongPassword123"
   }'
 ```
+---
 
 ### User Login API
 
 Authenticates a registered user and returns a **JWT token** along with user details.  
 The token allows the client to access protected APIs without storing session data on the server.
-
----
 
 #### Endpoint
 POST `/api/v1/auth/login`
@@ -138,7 +135,7 @@ POST `/api/v1/auth/login`
 }
 ```
 
-#### Failure Response Format
+#### Failure Response
 
 ```json
 {
@@ -161,5 +158,67 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
   -d '{
     "email": "user@example.com",
     "password": "StrongPassword123"
+  }'
+```
+---
+
+### Create Notes API
+
+Creates a new note for the authenticated user.  
+Each newly created note automatically creates **version 1** in the note version history.
+
+This API requires authentication via **JWT**.
+Authorization: Bearer <JWT_TOKEN>
+
+#### Endpoint
+POST `/api/v1/notes`
+
+#### Request Body
+
+```json
+{
+  "title": "My First Note",
+  "content": "This is the content of my note."
+}
+```
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "title": "My First Note",
+  "content": "This is the content of my note.",
+  "userId": 1,
+  "createdAt": "2026-01-02T12:00:00.000Z",
+  "updatedAt": "2026-01-02T12:00:00.000Z"
+}
+```
+
+#### Failure Response
+
+
+```json
+{
+  "message": "Error description",
+  "statusCode": 400
+}
+```
+Possible Error Messages:
+ - Title and content are required – 400
+ - Access token missing – 401
+ - Invalid token – 401
+
+#### Example
+
+```
+curl -X POST http://localhost:3000/api/v1/notes \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -d '{
+    "title": "My First Note",
+    "content": "This is the content of my note."
   }'
 ```
