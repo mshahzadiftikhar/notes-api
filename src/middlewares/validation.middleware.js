@@ -16,6 +16,19 @@ const validateRegistration = (req, res, next) => {
   next();
 };
 
+const validateLogin = (req, res, next) => {
+  const { email, password } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: 'email and password are required'
+    });
+  }
+
+  next();
+};
+
 module.exports = {
-  validateRegistration
+  validateRegistration,
+  validateLogin
 };

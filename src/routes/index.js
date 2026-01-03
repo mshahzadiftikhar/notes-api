@@ -1,5 +1,5 @@
 const healthRoutes = require('./health.routes');
-const authRoutes = require('./user.register.route');
+const authRoutes = require('./auth.route');
 
 const registerRoutes = (app) => {
   app.use('/', healthRoutes);
