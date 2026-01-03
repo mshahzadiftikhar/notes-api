@@ -48,7 +48,7 @@ It provides a secure and scalable foundation for a note-taking application with 
 
 ## APIs
 
-#### User Registration 
+### User Registration API
 
 Creates a new user account with **secure password hashing**.  
 This endpoint validates input, prevents duplicate registrations, and ensures passwords are **never stored in plaintext**.
@@ -93,3 +93,73 @@ Possible Error Messages
  - Password must be at least 8 characters long – 400
  - User already exists – 409
  - Internal Server Error – 500
+
+#### Example
+
+```
+curl -X POST http://localhost:3000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "StrongPassword123"
+  }'
+```
+
+### User Login API
+
+Authenticates a registered user and returns a **JWT token** along with user details.  
+The token allows the client to access protected APIs without storing session data on the server.
+
+---
+
+#### Endpoint
+POST `/api/v1/auth/login`
+
+#### Request Body
+
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPassword123"
+}
+```
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "email": "user@example.com"
+  }
+}
+```
+
+#### Failure Response Format
+
+```json
+{
+  "message": "Error description",
+  "statusCode": 400
+}
+```
+
+Possible Error Messages
+ - Email and password are required – 400
+ - User not found – 404
+ - Invalid email or password - 400
+ - Internal Server Error – 500
+
+#### Example
+
+```
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "StrongPassword123"
+  }'
+```
