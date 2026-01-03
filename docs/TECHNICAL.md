@@ -312,3 +312,36 @@ GET `/api/v1/notes/:id`
 curl -X GET http://localhost:3000/api/v1/notes/1 \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
+
+---
+
+### Delete Note API
+
+Soft deletes a note for the authenticated user while **preserving its version history**.  
+The note will no longer appear in list or detail APIs after deletion.
+
+This API requires authentication via **JWT**.  
+Authorization: Bearer <JWT_TOKEN>
+
+#### Endpoint
+DELETE `/api/v1/notes/:id`
+
+#### Request Parameters
+
+- `id` – ID of the note to delete
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "message": "Note deleted successfully"
+}
+```
+
+#### Example
+```
+curl -X DELETE http://localhost:3000/api/v1/notes/1 \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
