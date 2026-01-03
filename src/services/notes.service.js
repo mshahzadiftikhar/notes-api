@@ -21,10 +21,47 @@ const createNote = async ({ userId, title, content }) => {
 
 const getAllNotes = async (userId, fields = ['id', 'title', 'content']) => {
     return await Note.findAll({
-        where: { user_id: userId },
+        where: { user_id: userId, deleted_at: null },
         attributes: fields,
         order: [['updatedAt', 'DESC']]
     });
 };
 
-module.exports = { createNote, getAllNotes };
+const getNoteById = async ({ noteId, userId }) => {
+  // Fetch note and ensure it exists (soft delete check)
+  const note = await Note.findOne({
+    where: {
+      id: noteId,
+      user_id: userId,
+      deleted_at: null
+    }
+  });
+
+  if (!note) {
+    const error = new Error('Note not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Fetch all versions
+  const versions = await NoteVersion.findAll({
+    where: { note_id: noteId },
+    order: [['version', 'DESC']]
+  });
+
+  return {
+    id: note.id,
+    title: note.title,
+    content: note.content,
+    userId: note.userId,
+    createdAt: note.createdAt,
+    updatedAt: note.updatedAt,
+    versions: versions.map(v => ({
+      version: v.version,
+      title: v.title,
+      content: v.content,
+    }))
+  };
+};
+
+module.exports = { createNote, getAllNotes, getNoteById };

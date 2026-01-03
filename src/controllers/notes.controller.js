@@ -1,4 +1,4 @@
-const { createNote, getAllNotes } = require('../services/notes.service');
+const { createNote, getAllNotes, getNoteById } = require('../services/notes.service');
 
 const create = async (req, res, next) => {
   try {
@@ -24,4 +24,16 @@ const getAll = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getAll };
+const getById = async (req, res, next) => {
+  try {
+    const note = await getNoteById({
+      noteId: req.params.id,
+      userId: req.user.id
+    });
+    res.status(200).json(note);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { create, getAll, getById };

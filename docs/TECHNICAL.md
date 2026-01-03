@@ -261,3 +261,54 @@ GET `/api/v1/notes`
 curl -X GET http://localhost:3000/api/v1/notes \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
+
+---
+
+### Retrieve Note by ID API
+
+Fetches a specific note by its ID for the authenticated user. Returns the latest note data along with all historical versions.  
+
+
+This API requires authentication via **JWT**.  
+Authorization: Bearer <JWT_TOKEN>
+
+#### Endpoint
+GET `/api/v1/notes/:id`
+
+#### Request Parameters
+
+- `id` – ID of the note to retrieve
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "title": "Latest note title",
+  "content": "Latest note content",
+  "userId": 1,
+  "createdAt": "2026-01-02T09:00:00.000Z",
+  "updatedAt": "2026-01-02T12:30:00.000Z",
+  "versions": [
+    {
+      "versionNumber": 1,
+      "title": "My First Note",
+      "content": "Initial content"
+    },
+    {
+      "versionNumber": 2,
+      "title": "My First Note",
+      "content": "Updated content"
+    }
+  ]
+}
+```
+
+#### Example
+
+```
+curl -X GET http://localhost:3000/api/v1/notes/1 \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
