@@ -1,4 +1,4 @@
-const { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword } = require('../services/notes.service');
+const { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote } = require('../services/notes.service');
 
 const create = async (req, res, next) => {
   try {
@@ -71,4 +71,27 @@ const searchNotes = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getAll, getById, deleteNote, searchNotes };
+const update = async (req, res) => {
+  try {
+    const { title, content, version } = req.body || {};
+    const noteId = req.params.id;
+    const userId = req.user.id;
+
+    if (version === undefined) {
+      return res.status(400).json({ message: 'version is required', statusCode: 400 });
+    }
+
+    if (title === undefined && content === undefined) {
+      return res.status(400).json({ message: 'At least one of title or content must be provided', statusCode: 400 });
+    }
+
+    const updatedNote = await updateNote({ noteId, userId, title, content, version });
+
+    return res.status(200).json(updatedNote);
+  } catch (err) {
+    console.error(err);
+    return res.status(err.statusCode || 500).json({ message: err.message || 'Internal Server Error', statusCode: err.statusCode || 500 });
+  }
+};
+
+module.exports = { create, getAll, getById, deleteNote, searchNotes, update };

@@ -19,7 +19,7 @@ const createNote = async ({ userId, title, content }) => {
   return note;
 };
 
-const getAllNotes = async (userId, fields = ['id', 'title', 'content']) => {
+const getAllNotes = async (userId, fields = ['id', 'title', 'content', 'version']) => {
     return await Note.findAll({
         where: { user_id: userId, deleted_at: null },
         attributes: fields,
@@ -94,4 +94,46 @@ const searchNotesByKeyword = async ({ userId, keyword }) => {
   });
 };
 
-module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword };
+const updateNote = async ({ noteId, userId, title, content, version }) => {
+  const note = await Note.findOne({ where: { id: noteId, user_id: userId, deletedAt: null } });
+
+  if (!note) {
+    const error = new Error('Note not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Check optimistic lock (version)
+  if (note.version !== version) {
+    const error = new Error('Concurrent update detected. Please refresh and try again.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+    // Merge fields: only update what is provided
+  if (title === undefined)
+     title = note.title;
+
+  if (content === undefined)
+    content = note.content;
+
+  const newVersion = note.version + 1;
+
+  // Update note
+  note.title = title;
+  note.content = content;
+  note.version = newVersion;
+  await note.save();
+
+  // Insert into version history
+  await NoteVersion.create({
+    note_id: note.id,
+    title,
+    content,
+    version: newVersion
+  });
+
+  return note;
+};
+
+module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote };
