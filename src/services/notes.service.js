@@ -1,4 +1,4 @@
-const { Note, NoteVersion } = require('../models');
+const { Note, NoteVersion, Sequelize } = require('../models');
 
 const createNote = async ({ userId, title, content }) => {
   // Create note (models use snake_case column names: user_id)
@@ -80,4 +80,18 @@ const softDeleteNote = async ({ noteId, userId }) => {
     return { message: 'Note deleted successfully' };
 };
 
-module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote };
+const searchNotesByKeyword = async ({ userId, keyword }) => {
+  return await Note.findAll({
+    where: {
+      user_id: userId,
+      deleted_at: null,
+      [Sequelize.Op.and]: Sequelize.literal(
+        `MATCH (title, content) AGAINST (:keyword IN NATURAL LANGUAGE MODE)`
+      )
+    },
+    replacements: { keyword },
+    order: [['updated_at', 'DESC']]
+  });
+};
+
+module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword };
