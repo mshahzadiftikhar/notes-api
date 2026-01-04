@@ -429,3 +429,44 @@ curl -X POST http://localhost:3000/api/v1/notes/1 \
     "version": 2
   }'
 ```
+---
+
+### Revert Note Version API
+
+Reverts a note to a specified previous version.
+
+This operation **does not delete history**.  
+Instead, it creates a **new version** using the content of the selected historical version.
+
+This API requires authentication via **JWT**.
+
+Authorization: Bearer `<JWT_TOKEN>`
+
+---
+
+#### Endpoint
+
+POST `/api/v1/notes/:id/revert`
+
+---
+
+#### Request Body
+
+```json
+{
+  "targetVersion": 1,
+  "currentVersion": 3
+}
+```
+
+#### Example
+
+```
+curl -X POST http://localhost:3000/api/v1/notes/1/revert \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -d '{
+    "targetVersion": 1,
+    "currentVersion": 3
+  }'
+```

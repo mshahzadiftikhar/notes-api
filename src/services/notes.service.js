@@ -136,4 +136,49 @@ const updateNote = async ({ noteId, userId, title, content, version }) => {
   return note;
 };
 
-module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote };
+const revertNote = async ({ noteId, userId, targetVersion, currentVersion }) => {
+  const note = await Note.findOne({
+    where: { id: noteId, user_id: userId, deletedAt: null }
+  });
+
+  if (!note) {
+    const error = new Error('Note not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (note.version !== currentVersion) {
+    const error = new Error('Concurrent update detected');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const versionToRevert = await NoteVersion.findOne({
+    where: { note_id: noteId, version: targetVersion }
+  });
+
+  if (!versionToRevert) {
+    const error = new Error('Requested version not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const newVersion = note.version + 1;
+
+  note.title = versionToRevert.title;
+  note.content = versionToRevert.content;
+  note.version = newVersion;
+
+  await note.save();
+
+  await NoteVersion.create({
+    note_id: note.id,
+    title: note.title,
+    content: note.content,
+    version: newVersion
+  });
+
+  return note;
+};
+
+module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote, revertNote };
