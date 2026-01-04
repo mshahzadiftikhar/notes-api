@@ -345,3 +345,23 @@ DELETE `/api/v1/notes/:id`
 curl -X DELETE http://localhost:3000/api/v1/notes/1 \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
+---
+
+### Retrieve Notes by Keywords (Full-Text Search)
+
+This API allows users to search for their notes using keywords. It uses MySQL full-text search on the title and content columns of the notes table.
+ - This only searches whole words and words longer than 3 characters (controlled by MySQL’s ft_min_word_len)
+ - Short words (length < 4) and partial words (e.g., 'con' instead of 'content') are ignored.
+
+#### Endpoint
+GET `/api/v1/notes/search?query=<keyword>`
+
+Requires authentication via JWT.
+Authorization: Bearer <JWT_TOKEN>
+
+#### Example
+
+```
+curl -X GET "http://localhost:3000/api/v1/notes/search?query=meeting" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```

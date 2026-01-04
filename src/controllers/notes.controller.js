@@ -1,4 +1,4 @@
-const { createNote, getAllNotes, getNoteById, softDeleteNote } = require('../services/notes.service');
+const { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword } = require('../services/notes.service');
 
 const create = async (req, res, next) => {
   try {
@@ -50,4 +50,25 @@ const deleteNote = async (req, res, next) => {
   }
 };
 
-module.exports = { create, getAll, getById, deleteNote };
+const searchNotes = async (req, res, next) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({
+        message: `Search 'query' is required. Example: /api/v1/notes/search?query=meeting`
+      });
+    }
+
+    const notes = await searchNotesByKeyword({
+      userId: req.user.id,
+      keyword: query
+    });
+
+    res.status(200).json(notes);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { create, getAll, getById, deleteNote, searchNotes };
