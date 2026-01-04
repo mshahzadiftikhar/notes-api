@@ -365,3 +365,67 @@ Authorization: Bearer <JWT_TOKEN>
 curl -X GET "http://localhost:3000/api/v1/notes/search?query=meeting" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
+
+---
+
+### Update Note API
+
+Updates an existing note for the authenticated user.
+
+This API supports **partial updates**, meaning **either `title` or `content` (or both)** must be provided.  
+To prevent concurrent updates, **optimistic locking** is enforced using a `version` field.
+
+If the provided version does not match the latest version stored in the database, the update is rejected.
+
+This API requires authentication via **JWT**.
+
+Authorization: Bearer `<JWT_TOKEN>`
+
+#### Endpoint
+
+POST `/api/v1/notes/:id`
+
+#### Request Parameters
+
+- `id` – ID of the note to delete
+
+#### Request Body
+
+```json
+{
+  "title": "Updated Title",
+  "content": "Updated content",
+  "version": 2
+}
+```
+ - version is mandatory
+ - At least one of title or content must be provided
+
+#### Success Response
+
+Status Code: `200 OK`
+
+```
+{
+    "id": 2,
+    "user_id": 2,
+    "title": "lets update",
+    "content": "note 2 content",
+    "version": 3,
+    "createdAt": "2026-01-03T08:56:27.000Z",
+    "updatedAt": "2026-01-04T10:42:58.532Z",
+    "deletedAt": null
+}
+```
+
+#### Example
+
+```
+curl -X POST http://localhost:3000/api/v1/notes/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -d '{
+    "content": "Updated note content",
+    "version": 2
+  }'
+```
