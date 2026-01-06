@@ -1,4 +1,8 @@
 const { Note, NoteVersion, Sequelize } = require('../models');
+const redis = require('../config/redis')();
+
+// Cache TTL (time to live) in seconds
+const CACHE_TTL = process.env.CACHE_TTL || 120;
 
 const createNote = async ({ userId, title, content }) => {
   // Create note (models use snake_case column names: user_id)
@@ -16,19 +20,36 @@ const createNote = async ({ userId, title, content }) => {
     content
   });
 
+  await invalidateCache(userId);
+
   return note;
 };
 
-const getAllNotes = async (userId, fields = ['id', 'title', 'content', 'version']) => {
-    return await Note.findAll({
+const getAllNotes = async (userId, fields = ['id', 'title', 'content', 'version', 'createdAt', 'updatedAt']) => {
+
+    const cacheKey = `notes:user:${userId}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+        return JSON.parse(cached);
+    }
+
+    const notes = await Note.findAll({
         where: { user_id: userId, deleted_at: null },
         attributes: fields,
         order: [['updatedAt', 'DESC']]
     });
+
+    await redis.set(cacheKey, JSON.stringify(notes), 'EX', CACHE_TTL);
+    return notes;
 };
 
 const getNoteById = async ({ noteId, userId }) => {
-  // Fetch note and ensure it exists (soft delete check)
+  const cacheKey = `note:${noteId}:user:${userId}`;
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
   const note = await Note.findOne({
     where: {
       id: noteId,
@@ -43,25 +64,33 @@ const getNoteById = async ({ noteId, userId }) => {
     throw error;
   }
 
-  // Fetch all versions
   const versions = await NoteVersion.findAll({
     where: { note_id: noteId },
     order: [['version', 'DESC']]
   });
 
-  return {
+  const response = {
     id: note.id,
     title: note.title,
     content: note.content,
-    userId: note.userId,
+    userId: note.user_id,
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
     versions: versions.map(v => ({
       version: v.version,
       title: v.title,
-      content: v.content,
+      content: v.content
     }))
   };
+
+  await redis.set(
+    cacheKey,
+    JSON.stringify(response),
+    'EX',
+    CACHE_TTL
+  );
+
+  return response;
 };
 
 const softDeleteNote = async ({ noteId, userId }) => {
@@ -76,6 +105,8 @@ const softDeleteNote = async ({ noteId, userId }) => {
     }
 
     await note.destroy(); // Soft delete because we have set paranoid to true in model
+
+    await invalidateCache(userId, noteId);
 
     return { message: 'Note deleted successfully' };
 };
@@ -133,6 +164,8 @@ const updateNote = async ({ noteId, userId, title, content, version }) => {
     version: newVersion
   });
 
+  await invalidateCache(userId, noteId);
+
   return note;
 };
 
@@ -178,7 +211,16 @@ const revertNote = async ({ noteId, userId, targetVersion, currentVersion }) => 
     version: newVersion
   });
 
+  await invalidateCache(userId, noteId);
+
   return note;
 };
 
-module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote, revertNote };
+async function invalidateCache(userId, noteId) {
+  if (noteId) {
+    await redis.del(`note:${noteId}:user:${userId}`);
+  }
+  await redis.del(`notes:user:${userId}`);
+}
+
+module.exports = { createNote, getAllNotes, getNoteById, softDeleteNote, searchNotesByKeyword, updateNote, revertNote, invalidateCache };
