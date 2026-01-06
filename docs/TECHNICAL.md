@@ -46,6 +46,60 @@ It provides a secure and scalable foundation for a note-taking application with 
 
 ---
 
+## Application Architecture
+
+The application follows a layered architecture to promote separation of concerns and maintainability.
+
+- **Routes Layer**
+  - Defines HTTP routes and attaches middleware
+- **Controller Layer**
+  - Handles request/response logic
+  - Performs input validation and error handling
+- **Service Layer**
+  - Contains business logic
+  - Handles database access and caching
+- **Model Layer**
+  - Sequelize models representing database tables
+
+Controllers remain thin, while services encapsulate core application logic.
+
+---
+## Concurrency Control
+
+Optimistic locking is used to prevent concurrent updates to the same note.
+
+### Approach
+- Each note contains a `version` field
+- Clients must send the current version when updating
+- If the stored version does not match the provided version:
+  - Update is rejected with `409 Conflict`
+
+### Benefits
+- No database locks
+- High performance
+- Suitable for distributed systems
+
+This approach ensures data integrity while maintaining scalability.
+
+---
+
+## Note Versioning
+
+Each note update creates a new immutable version stored in `note_versions`.
+
+- Version numbers are sequential (1, 2, 3…)
+- Reverting a note creates a new version instead of overwriting history
+- Version history is preserved even after soft deletion
+
+This ensures:
+- Full audit history
+- Safe rollbacks
+- Non-destructive updates
+
+---
+
+
+
 ## Redis Caching 
 
 Redis is used as an in-memory caching layer to improve the performance of frequently accessed read APIs in the Notes API. By caching read-heavy responses, we reduce database load, lower response latency, and improve overall scalability.

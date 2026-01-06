@@ -2,6 +2,77 @@
 
 A note taking backend infrastructure using Express.js.
 
+## Quick start — get running locally
+
+Follow these steps to get the project running locally from a clean machine.
+
+1. Clone and install dependencies
+
+```bash
+git clone https://github.com/mshahzadiftikhar/notes-api.git
+cd notes-api
+npm install
+```
+
+2. Create a `.env` file in the project root (example values below).
+
+```
+PORT=3000
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=notes_db
+DB_USER=root
+DB_PASSWORD=root
+
+JWT_SECRET=some_value
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+CACHE_TTL=120
+```
+
+3. Start the local database (uses Docker Compose)
+Make sure docker is installed.
+```bash
+npm run db:start
+```
+
+4. Run database migrations
+
+```bash
+npm run db:migrate
+```
+
+5. Start the server
+
+```bash
+npm start
+# or for development with auto-reload:
+npm run dev
+```
+
+6. Stop local DB when finished
+
+```bash
+npm run db:stop
+```
+
+If you need to reset the DB (removes volumes):
+
+```bash
+npm run db:reset
+```
+
+Troubleshooting quick tips:
+- If you see `JWT_SECRET is not defined` set a value for `JWT_SECRET` in `.env`.
+- If the app can't connect to the DB, verify Docker is running and that `DB_HOST`/`DB_PORT` match the Compose service.
+
+## APIs
+
+APIs detailed can be found at: [API Details](docs/APIs.md)
+
 ## Overview
 
 `notes-api` is a small backend service built with Node.js and Express for storing and serving notes. The project uses Sequelize as an ORM and a MySQL database (via Docker Compose) for persistence.
@@ -28,11 +99,19 @@ Create a `.env` file in the project root to configure the app and database. Exam
 
 ```
 PORT=3000
-DB_HOST=127.0.0.1
+
+DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=example
 DB_NAME=notes_db
+DB_USER=root
+DB_PASSWORD=root
+
+JWT_SECRET=some_secret_here
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+CACHE_TTL=120
 ```
 
 (Adjust values to match your Docker Compose service or your external DB.)
